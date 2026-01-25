@@ -98,13 +98,13 @@
   </div>
 
   <script>
-    const PASSWORD = "TON_MOT_DE_PASSE";
+    const PASSWORD = "t";
   
     function rand(min, max) {
       return Math.random() * (max - min) + min;
     }
   
-    function confettiBurst(count = 60) {
+    function confettiBurst(count = 100) {
       for (let i = 0; i < count; i++) {
         const c = document.createElement("div");
         c.className = "confetti";
@@ -154,7 +154,7 @@
   
         setTimeout(() => {
           window.location.href = "secret.html";
-        }, 1000);
+        }, 3000);
       }, 900);
     }
   
