@@ -47,32 +47,121 @@
       margin-top: 15px;
       display: none;
     }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-6px); }
+      100% { transform: translateX(0); }
+    }
+    
+    .shake { animation: shake 0.4s; }
+    
+    .status {
+      margin-top: 16px;
+      white-space: pre-line;
+      font-weight: 600;
+      display: none;
+    }
+    
+    .status.ok { color: #1e7f3a; }
+    .status.bad { color: #c0392b; }
+    
+    .confetti {
+      position: fixed;
+      top: -12px;
+      width: 10px;
+      height: 14px;
+      border-radius: 2px;
+      animation: fall 1.2s linear forwards;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0.9;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Accès privé 🔐</h1>
+    <h1>Accès réservé à une grosse chamelle 🔐</h1>
     <p>Entre le mot de passe reçu par lettre.</p>
 
     <input type="password" id="password" placeholder="Mot de passe">
     <button onclick="checkPassword()">Entrer</button>
 
-    <div class="error" id="error">Mot de passe incorrect</div>
+    <div class="status" id="status"></div>
   </div>
 
   <script>
-    const PASSWORD = "JeSuisUnePetiteSalope68*";
-
-    function checkPassword() {
-      const input = document.getElementById("password").value;
-      const error = document.getElementById("error");
-
-      if (input === PASSWORD) {
-        window.location.href = "secret.html";
-      } else {
-        error.style.display = "block";
+    const PASSWORD = "TON_MOT_DE_PASSE";
+  
+    function rand(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+  
+    function confettiBurst(count = 60) {
+      for (let i = 0; i < count; i++) {
+        const c = document.createElement("div");
+        c.className = "confetti";
+  
+        // couleurs flashy random
+        const hue = Math.floor(rand(0, 360));
+        c.style.background = `hsl(${hue} 90% 60%)`;
+  
+        c.style.left = rand(0, 100) + "vw";
+        c.style.transform = `translateY(0) rotate(${rand(0, 360)}deg)`;
+        c.style.animationDuration = rand(0.9, 1.6) + "s";
+  
+        // petite variation de taille
+        c.style.width = rand(6, 12) + "px";
+        c.style.height = rand(8, 16) + "px";
+  
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 1800);
       }
     }
+  
+    function setStatus(text, kind) {
+      const s = document.getElementById("status");
+      s.style.display = "block";
+      s.classList.remove("ok", "bad");
+      if (kind) s.classList.add(kind);
+      s.textContent = text;
+    }
+  
+    function checkPassword() {
+      const input = document.getElementById("password").value;
+      const card = document.querySelector(".card");
+  
+      if (input !== PASSWORD) {
+        setStatus("Tu sais pas lire bb?", "bad");
+        card.classList.add("shake");
+        setTimeout(() => card.classList.remove("shake"), 400);
+        return;
+      }
+  
+      // Bon mot de passe → troll
+      setStatus("Bb change donc tes lentchilles 👁️👄👁️", "bad");
+  
+      setTimeout(() => {
+        setStatus("C une blague bb, je t'ouvre", "ok");
+        confettiBurst(90);
+  
+        setTimeout(() => {
+          window.location.href = "secret.html";
+        }, 1000);
+      }, 900);
+    }
+  
+    // Entrée au clavier
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") checkPassword();
+    });
   </script>
 </body>
 </html>
