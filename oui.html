@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="robots" content="noindex" />
+  <title>OUIIIIIIIIIII</title>
+  <style>
+    html, body { margin: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f6f3ef; /* couleur des marges (même que les côtés) */
+      background-color: #f6f3ef;
+      color: #222;
+      padding: 32px 24px;
+      position: relative;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-top: 86px; /* place for top banner */
+    }
+    .card {
+      position: relative;
+      background: white;
+      padding: 48px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+      max-width: 680px;
+      width: 100%;
+      margin: 0 auto;
+      text-align: center;
+      overflow: hidden; /* pour le fond flou */
+    }
+
+    /* Fond flou derrière la card (activé via JS) */
+    .card.bg-couic::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("couic.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      filter: blur(5px) brightness(0.85) saturate(1.1);
+      transform: scale(1.15);
+      z-index: 0;
+    }
+
+    /* Card spéciale quand fond image (taille basée sur l'image) */
+    .card.bg-couic {
+      padding: 64px 48px;
+      max-width: 520px;
+    }
+
+    /* Lisibilité sans voile : contour + ombre sur le texte */
+    .card.bg-couic h1,
+    .card.bg-couic p {
+      color: #111;
+      text-shadow:
+        0 1px 2px rgba(0,0,0,0.45),
+        0 0 8px rgba(255,255,255,0.6);
+    }
+
+    /* Léger fond translucide uniquement sous le texte (optionnel mais discret) */
+    .card.bg-couic .text-overlay {
+      padding: 8px 12px;
+    }
+
+    .card > * {
+      position: relative;
+      z-index: 1;
+    }
+    .section {
+      margin-top: 48px;
+      text-align: center;
+    }
+
+    .section img {
+      max-width: 100%;
+      border-radius: 18px;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.15);
+      margin-top: 16px;
+    }
+
+    .spacer {
+      height: 60px;
+    }
+
+    /* Pluie (confettis + coeurs) sur les côtés */
+    .side-rain {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: min(18vw, 220px);
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 9999;
+    }
+
+    #rainLeft { left: 0; }
+    #rainRight { right: 0; }
+
+    @keyframes fall {
+      from {
+        transform: translateY(-10vh) rotate(0deg);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0.95;
+      }
+    }
+
+    .rain-piece {
+      position: absolute;
+      top: -40px;
+      will-change: transform;
+      animation-name: fall;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+    }
+
+    .rain-confetti {
+      width: 10px;
+      height: 16px;
+      border-radius: 2px;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+    }
+
+    .rain-emoji {
+      font-size: 26px;
+      filter: drop-shadow(0 10px 16px rgba(0,0,0,0.18));
+    }
+
+    /* Sur petits écrans, on réduit un peu la pluie pour ne pas gêner */
+    @media (max-width: 700px) {
+      .side-rain { width: 72px; }
+    }
+
+    /* Center background area (excluding side rain lanes) */
+    .center-bg {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: min(18vw, 220px);
+      right: min(18vw, 220px);
+
+      /* Color behind the PNG (shows through transparency) */
+      background-color: #f6f3ef;
+
+      /* We draw the PNG only ONCE via ::after */
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .center-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+
+      /* The PNG layer */
+      background-image: url("background_oui.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: blur(8px);
+      transform: scale(1.02);
+
+      /* Slight fade without affecting the background-color behind */
+      opacity: .9;
+
+      pointer-events: none;
+    }
+
+    /* Top banner */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(246, 243, 239, 0.78);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+      z-index: 10000;
+    }
+
+    .topbar-inner {
+      width: min(980px, calc(100% - 24px));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .topbar-title {
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .nav-item {
+      position: relative;
+      font-weight: 900;
+      cursor: pointer;
+      padding: 10px 12px;
+      border-radius: 14px;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.65);
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      min-width: 240px;
+      background: rgba(255,255,255,0.96);
+      border-radius: 16px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+      padding: 10px;
+      display: none;
+      z-index: 10002;
+      margin-top: 10px;
+    }
+    .dropdown::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: 0;
+      right: 0;
+      height: 10px;
+    }
+    #productArea {
+      margin-top: 26px;
+      display: none;
+    }
+
+    #productArea.show {
+      display: block;
+    }
+
+    .product-card {
+      margin: 0 auto;
+      max-width: 720px;
+      background: rgba(255,255,255,0.92);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.14);
+    }
+
+    #defaultContent {
+      margin-top: 26px;
+    }
+
+    .product-card img {
+      display: block;
+      max-width: 100%;
+      border-radius: 18px;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.15);
+      margin: 0 auto;
+    }
+
+    /* Long-form article layout inside product-card */
+    .article {
+      text-align: left;
+      max-width: 820px;
+      margin: 0 auto;
+      line-height: 1.7;
+      font-size: 18px;
+    }
+
+    .article h2 {
+      margin: 0 0 14px;
+      font-weight: 900;
+    }
+
+    .article p {
+      margin: 0 0 16px;
+      font-weight: 700;
+      opacity: 0.9;
+    }
+
+    .article .center {
+      text-align: center;
+    }
+
+    .article-table {
+      width: min(720px, 100%);
+      margin: 14px auto 18px;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 14px;
+      box-shadow: 0 12px 26px rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.92);
+    }
+
+    .article-table th,
+    .article-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      text-align: left;
+      font-weight: 800;
+    }
+
+    .article-table th {
+      background: rgba(246,243,239,0.95);
+      font-weight: 900;
+    }
+
+    .is-hidden {
+      display: none;
+    }
+
+    .btn-toggle {
+      border: none;
+      border-radius: 14px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 900;
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.10);
+    }
+
+    .toggle-row {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toggle-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 900;
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.10);
+    }
+
+    .toggle-btn.active {
+      outline: 3px solid rgba(240, 193, 75, 0.9);
+    }
+
+    /* Full-screen popup for item 2 */
+    .full-popup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10004;
+    }
+
+    .full-popup.show {
+      display: flex;
+    }
+
+    .full-popup .box {
+      background: rgba(255,255,255,0.94);
+      border-radius: 18px;
+      padding: 26px 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+      font-weight: 900;
+      font-size: 34px;
+    }
+
+    .nav-item:hover .dropdown {
+      display: block;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(246,243,239,0.9);
+    }
+
+    /* Section output for "Nos services" */
+    #servicesOutput {
+      margin-top: 22px;
+      font-weight: 900;
+      font-size: 22px;
+      display: none;
+    }
+
+    #servicesOutput.show {
+      display: block;
+    }
+
+    .icon-btn {
+      border: none;
+      background: rgba(255,255,255,0.9);
+      border-radius: 14px;
+      padding: 10px 12px;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    }
+
+    .icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .cart-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #e74c3c;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 900;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+    .search-input {
+      width: 0;
+      opacity: 0;
+      transition: width 0.25s ease, opacity 0.25s ease;
+      border: 1px solid rgba(0,0,0,0.15);
+      border-radius: 14px;
+      padding: 10px 12px;
+      outline: none;
+      background: rgba(255,255,255,0.9);
+    }
+
+    .search-input.visible {
+      width: min(280px, 52vw);
+      opacity: 1;
+    }
+
+    /* Overlay message */
+    .overlay-msg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+    }
+
+    .overlay-msg .box {
+      background: rgba(255,255,255,0.92);
+      border-radius: 18px;
+      padding: 26px 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+      font-weight: 900;
+      font-size: 28px;
+    }
+
+    .overlay-msg.show {
+      display: flex;
+    }
+
+    /* Ensure centered content stays above background */
+    .page-wrap {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Close button for main card */
+    .card-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 34px;
+      height: 34px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: rgba(255,255,255,0.85);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .card.hidden {
+      display: none;
+    }
+
+    @media (max-width: 700px) {
+      .center-bg {
+        left: 72px;
+        right: 72px;
+      }
+    }
+
+    /* Mini-panier façon Amazon */
+    .cart-popover {
+      position: fixed;
+      top: 70px; /* juste sous la topbar */
+      right: 24px;
+      width: min(380px, calc(100% - 48px));
+      background: rgba(255,255,255,0.96);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.22);
+      padding: 16px;
+      z-index: 10002;
+      display: none;
+      backdrop-filter: blur(10px);
+    }
+
+    .cart-popover.show { display: block; }
+
+    .cart-popover h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(246, 243, 239, 0.85);
+    }
+
+    .cart-item img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.75);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.10);
+    }
+
+    .cart-item-name {
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .cart-actions {
+      margin-top: 14px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-primary {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-weight: 900;
+      background: #f0c14b;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: fixed;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 14px;
+      z-index: 10003;
+      display: none;
+      max-width: 260px;
+      text-align: center;
+    }
+
+    .tooltip.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="center-bg" aria-hidden="true"></div>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-title">Le Chamelle Store</div>
+
+      <nav class="topbar-nav" aria-label="Navigation">
+        <div class="nav-item" id="navProducts">
+          Nos produits
+          <div class="dropdown" role="menu" aria-label="Produits">
+            <div class="dropdown-item" data-key="mollets" role="menuitem">Mollets 🦵🏻</div>
+            <div class="dropdown-item" data-key="aubergine" role="menuitem">🔞 🍆</div>
+            <div class="dropdown-item" data-key="doigt" role="menuitem">🖕🏻</div>
+            <div class="dropdown-item" data-key="valentine" role="menuitem">Carte de Saint-Valentin</div>
+            <div class="dropdown-item" data-key="robot" role="menuitem">Aspirateur robot</div>
+          </div>
+        </div>
+
+        <div class="nav-item" id="navServices">Nos services</div>
+        <div class="nav-item" id="navStory">Notre histoire</div>
+      </nav>
+
+      <div class="topbar-actions">
+        <button class="icon-btn" id="searchBtn" type="button" aria-label="Rechercher">
+          <span class="icon">🔎</span>
+        </button>
+        <input class="search-input" id="searchInput" type="text" placeholder="Rechercher…" />
+
+        <button class="icon-btn cart-wrap" id="cartBtn" type="button" aria-label="Panier">
+          <span class="icon">🛒</span>
+          <span class="badge">1</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay-msg" id="overlayMsg" aria-hidden="true">
+    <div class="box">Qu'est ce que tu veux chercher d'autre??? tu m'as déjà.</div>
+  </div>
+
+  <div class="cart-popover" id="cartPopover" aria-hidden="true">
+    <h3>Panier (1 article)</h3>
+
+    <div class="cart-item">
+      <img src="peugeot.png" alt="Peugeot" />
+      <div>
+        <div class="cart-item-name">Peugeot 200 Houite</div>
+        <div style="opacity:0.75; font-weight:700; margin-top:4px;">Quantité : 1</div>
+      </div>
+    </div>
+
+    <div class="cart-actions">
+      <button class="btn-primary" id="validateCartBtn" type="button">Valider le panier</button>
+    </div>
+  </div>
+
+  <div class="tooltip" id="tooltip" aria-hidden="true">Désolé g pas un copec</div>
+
+  <div class="side-rain" id="rainLeft" aria-hidden="true"></div>
+  <div class="side-rain" id="rainRight" aria-hidden="true"></div>
+  <div class="page-wrap" style="max-width: 900px; margin: 0 auto; text-align: center;">
+    <div class="card" id="mainCard">
+      <button class="card-close" id="closeMainCard" type="button" aria-label="Fermer">×</button>
+      <div class="text-overlay">
+        <h1 id="title"></h1>
+        <p id="message"></p>
+      </div>
+    </div>
+    <div id="servicesOutput" class="product-card">
+        <h3 style="margin:0 0 10px; font-weight:900;">Nos services pour une grosse chamelle 🐫</h3>
+        <p style="margin:0; font-weight:700; opacity:0.9;">
+            Euh bah c simple je ferai tout ce que tu voudras.
+        </p>
+    </div>
+
+    <div id="defaultContent" class="product-card">
+      <h3 style="margin:0 0 10px; font-weight:900;">Bienvenue au Chamelle Store de la St-Valentin 🐫</h3>
+      <p style="margin:0; font-weight:700; opacity:0.9;">
+        Clique un peu partout car g tout donné stp.
+      </p>
+    </div>
+
+    <div id="productArea"></div>
+
+    <div class="full-popup" id="fullPopup" aria-hidden="true">
+      <div class="box">eh oh ça va pas la tête!!!!! C seulement en face to face ça.</div>
+    </div>
+
+    <!-- <div class="section">
+      <h2>Pourquoi toi ?</h2>
+      <p>
+        Parce que t’es drôle, intelligente, imprévisible, et que même quand tu cliques sur "Non",
+        je sais très bien que tu penses "Oui".
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Petit rappel</h2>
+      <p>
+        Ceci est une page officielle, validée par le Conseil des Couics 🐥.
+        Toute tentative de retour en arrière est vaine.
+      </p>
+    </div>-->
+
+    
+
+    <div class="spacer"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const direct = params.get('direct') === '1';
+
+    const title = document.getElementById('title');
+    const msg = document.getElementById('message');
+    const card = document.getElementById('mainCard');
+    const closeBtn = document.getElementById('closeMainCard');
+    const searchBtn = document.getElementById('searchBtn');
+    const searchInput = document.getElementById('searchInput');
+    const overlayMsg = document.getElementById('overlayMsg');
+    const cartBtn = document.getElementById('cartBtn');
+    const cartPopover = document.getElementById('cartPopover');
+    const validateCartBtn = document.getElementById('validateCartBtn');
+    const tooltip = document.getElementById('tooltip');
+
+    const productArea = document.getElementById('productArea');
+    const fullPopup = document.getElementById('fullPopup');
+    const defaultContent = document.getElementById('defaultContent');
+    const navProducts = document.getElementById('navProducts');
+    const navStory = document.getElementById('navStory');
+    const navServices = document.getElementById('navServices');
+    const servicesOutput = document.getElementById('servicesOutput');
+
+    const robotLink = "https://www.amazon.fr/gp/aw/d/B0FPRK3FNV";
+    function resetPageViews() {
+      // Cache le contenu de base
+      if (defaultContent) defaultContent.style.display = 'none';
+
+      // Cache le bloc services
+      if (servicesOutput) servicesOutput.classList.remove('show');
+
+      // Cache et vide la zone produit
+      if (productArea) {
+        productArea.classList.remove('show');
+        productArea.innerHTML = '';
+      }
+
+      // Ferme le popup plein écran si ouvert
+      if (fullPopup) fullPopup.classList.remove('show');
+    }
+
+    function showInProductArea(html) {
+      if (!productArea) return;
+      resetPageViews();
+      productArea.innerHTML = `<div class="product-card">${html}</div>`;
+      productArea.classList.add('show');
+      productArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function setupTableToggle(btnId, tableId) {
+      const btn = document.getElementById(btnId);
+      const table = document.getElementById(tableId);
+      if (!btn || !table) return;
+
+      const updateLabel = () => {
+        const hidden = table.classList.contains('is-hidden');
+        btn.textContent = hidden ? 'Afficher' : 'Masquer';
+      };
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        table.classList.toggle('is-hidden');
+        updateLabel();
+      });
+
+      // état initial
+      table.classList.add('is-hidden');
+      updateLabel();
+    }
+
+    function setupImageToggle({ imgId, btnAId, btnBId, srcA, srcB }) {
+      const img = document.getElementById(imgId);
+      const btnA = document.getElementById(btnAId);
+      const btnB = document.getElementById(btnBId);
+      if (!img || !btnA || !btnB) return;
+
+      const setSide = (side) => {
+        if (side === 'a') {
+          img.src = srcA;
+          btnA.classList.add('active');
+          btnB.classList.remove('active');
+        } else {
+          img.src = srcB;
+          btnB.classList.add('active');
+          btnA.classList.remove('active');
+        }
+      };
+
+      btnA.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setSide('a');
+      });
+
+      btnB.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setSide('b');
+      });
+
+      // état initial
+      setSide('a');
+    }
+
+    function showPopup() {
+      if (!fullPopup) return;
+      resetPageViews();
+      fullPopup.classList.add('show');
+    }
+
+    function hidePopup() {
+      if (!fullPopup) return;
+      fullPopup.classList.remove('show');
+    }
+
+    if (fullPopup) {
+      fullPopup.addEventListener('click', hidePopup);
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        card.classList.add('hidden');
+      });
+    }
+
+    let overlayTimer = null;
+    if (searchBtn && searchInput && overlayMsg) {
+      searchBtn.addEventListener('click', () => {
+        // Toggle input visibility
+        searchInput.classList.add('visible');
+        searchInput.focus();
+
+        if (overlayTimer) clearTimeout(overlayTimer);
+        overlayTimer = setTimeout(() => {
+          overlayMsg.classList.add('show');
+        }, 1000);
+      });
+
+      // Click on overlay closes it
+      overlayMsg.addEventListener('click', () => {
+        overlayMsg.classList.remove('show');
+      });
+    }
+
+    // --- Mini-panier + tooltip ---
+    function showTooltipNear(el, text) {
+      if (!tooltip || !el) return;
+      tooltip.textContent = text;
+
+      const r = el.getBoundingClientRect();
+      const padding = 10;
+
+      // Position au-dessus du bouton
+      let x = r.left + r.width / 2;
+      let y = r.top - 14;
+
+      tooltip.classList.add('show');
+      tooltip.style.left = '0px';
+      tooltip.style.top = '0px';
+
+      // Mesure après affichage
+      const tw = tooltip.offsetWidth;
+      const th = tooltip.offsetHeight;
+
+      x = Math.min(window.innerWidth - tw - padding, Math.max(padding, x - tw / 2));
+      y = Math.min(window.innerHeight - th - padding, Math.max(padding, y - th));
+
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+
+      setTimeout(() => tooltip.classList.remove('show'), 1400);
+    }
+
+    function toggleCart() {
+      if (!cartPopover) return;
+      cartPopover.classList.toggle('show');
+    }
+
+    if (cartBtn && cartPopover) {
+      cartBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleCart();
+      });
+
+      // Click outside closes it
+      document.addEventListener('click', () => {
+        cartPopover.classList.remove('show');
+      });
+
+      // Prevent inside click from closing
+      cartPopover.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    if (validateCartBtn) {
+      validateCartBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showTooltipNear(validateCartBtn, 'Désolé g pas un copec');
+      });
+    }
+
+    if (direct) {
+      title.textContent = 'Merci bb de m’avoir choisi direct ❤️‍🔥';
+      msg.textContent = "c donc le plus beau jour de ma vie (encore). Cependant, tu peux toujours essayer de cliquer sur non sur la page d'avant car je me serais pas laissé faire :)";
+    } else {
+      title.textContent = 'Merci bb de ne pas avoir hésité (couic) 😠';
+      msg.textContent = "c donc le plus beau jour de ma vie (encore)";
+      card.classList.add('bg-couic');
+    }
+
+    // --- Menu navigation et dropdown ---
+
+    if (navServices && servicesOutput) {
+      navServices.addEventListener('click', (e) => {
+        e.stopPropagation();
+        resetPageViews();
+        servicesOutput.classList.add('show');
+        // Scroll léger pour le voir si besoin
+        servicesOutput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+
+    if (navProducts) {
+      navProducts.addEventListener('click', (e) => {
+        e.stopPropagation();
+        resetPageViews();
+      });
+    }
+
+    if (navStory) {
+      navStory.addEventListener('click', (e) => {
+        e.stopPropagation();
+        resetPageViews();
+        showInProductArea(`
+          <div class="article">
+            <h2>Notre histoire</h2>
+
+            <p>(texte placeholder) Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+
+            <div class="center">
+              <button class="btn-toggle" id="toggleStoryTableBtn" type="button">Afficher</button>
+            </div>
+
+            <table class="article-table is-hidden" id="storyTable">
+              <thead>
+                <tr>
+                  <th>Colonne A</th>
+                  <th>Colonne B</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Placeholder 1</td>
+                  <td>Placeholder 2</td>
+                </tr>
+                <tr>
+                  <td>Placeholder 3</td>
+                  <td>Placeholder 4</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p>(texte placeholder) Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+
+            
+            <img src="savon.png" alt="notre amour" />
+            
+          </div>
+        `);
+        setupTableToggle('toggleStoryTableBtn', 'storyTable');
+      });
+    }
+
+    // Clic sur un produit
+    document.querySelectorAll('.dropdown-item').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        const key = el.dataset.key;
+
+        if (key === 'mollets') {
+          showInProductArea(`
+            <img id="molletImg" src="mollet_avant.png" alt="Mollet" />
+            <div class="toggle-row">
+              <button class="toggle-btn" id="btnMolletAvant" type="button">Avant</button>
+              <button class="toggle-btn" id="btnMolletArriere" type="button">Arrière</button>
+            </div>
+          `);
+          setupImageToggle({
+            imgId: 'molletImg',
+            btnAId: 'btnMolletAvant',
+            btnBId: 'btnMolletArriere',
+            srcA: 'mollet_avant.png',
+            srcB: 'mollet_arriere.png'
+          });
+          return;
+        }
+
+        if (key === 'aubergine') {
+          showPopup();
+          return;
+        }
+
+        if (key === 'doigt') {
+          showInProductArea(`
+            <img id="doigtImg" src="doigt_avant.png" alt="Doigt" />
+            <div class="toggle-row">
+              <button class="toggle-btn" id="btnDoigtAvant" type="button">Avant</button>
+              <button class="toggle-btn" id="btnDoigtArriere" type="button">Arrière</button>
+            </div>
+          `);
+          setupImageToggle({
+            imgId: 'doigtImg',
+            btnAId: 'btnDoigtAvant',
+            btnBId: 'btnDoigtArriere',
+            srcA: 'doigt_avant.png',
+            srcB: 'doigt_arriere.png'
+          });
+          return;
+        }
+        
+        if (key === 'valentine') {
+          showInProductArea(/*html*/`
+            <div class="article">
+              <h2>Carte de Saint-Valentin</h2>
+
+              <p>Mon bb d’amour,</p>
+              <p>Même si c’est une fête commerciale, moi j’ai toujours envie de te couvrir (noyer) d’amour et de te gâter. 
+                J’ai donc pas seulement acheté un piti truc, j’ai carrément fait le magasin. J’espère que les produits te plairont.</p>
+              <p>J’ai longtemps hésité à reprendre mes cadeaux hebdromadaires mais je me suis dit qu’un gros cadeau pour une de nos fêtes ça 
+                serait mieux et ça changerait, sachant qu’à Noël je t’ai rien offert 🥺 en plus là c’est la fête des amoureux, je pense que ça s’applique bien à nous ❤️‍🔥</p>
+              <p>Je voudrais te prouver à travers ça que non seulement je t’aime plus que tout, mais que je dédierai un maximum de mon temps libre pour toi. 
+                Je t’ai déjà dit plusieurs fois que j’ai parfaitement conscience de la chance que j’ai de t’avoir et je compte bien te le montrer toute ma vie. 
+                Je te prendrai jamais pour acquise. Je veux que tu sentes tous les jours que tu es la femme la plus chanceuse de la Terre tout 
+                comme moi j'ai l'impression d'être le plus chanceux.</p>
+                <p></p>
+              <p>
+                Et comme j'ai envie de faire toute ma vie avec toi, je me suis dit que c'était important de poser les + et les - de toi. Donc les voici 
+                (c pas du tout exhaustif, je continuerai un autre jour) :
+              </p>
+              <div class="center">
+                <button class="btn-toggle" id="toggleValentineTableBtn" type="button">Afficher</button>
+              </div>
+
+              <table class="article-table is-hidden" id="valentineTable">
+                <thead>
+                  <tr>
+                    <th>+</th>
+                    <th>-</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Mange mes ongles</td>
+                    <td>Impossible de trouver plus belle</td>
+                  </tr>
+                  <tr>
+                    <td>M'empêche d'avoir trop chaud en prenant toute la couette</td>
+                    <td>Impossible de trouver plus bonne</td>
+                  </tr>
+                  <tr>
+                    <td>Est patiente pendant 1 seconde et demi</td>
+                    <td>Chaque bêtise est à 2 doigts de me faire canner</td>
+                  <tr>
+                    <td>A des supers goûts musicaux dans la variété française</td>
+                    <td>Pense beaucoup trop à moi et à me rendre heureux</td>
+                  </tr>
+                  <tr>
+                    <td></td>
+                    <td>Me fait/donne des t-shirts trop beaux du coup j'ai plus rien à choisir</td>
+                  </tr><tr>
+                    <td></td>
+                    <td>Me rend précoce</td>
+                  </tr>
+                    <td></td>
+                    <td>A des ongles de tchoin qui me frissonnent</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <p>(texte placeholder) Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+
+              <!--
+              <img src="ton_image.jpg" alt="Une image" />
+              -->
+            </div>
+          `);
+          setupTableToggle('toggleValentineTableBtn', 'valentineTable');
+          return;
+        }
+
+        if (key === 'robot') {
+          resetPageViews();
+          window.open(robotLink, '_blank', 'noopener,noreferrer');
+          return;
+        }
+      });
+    });
+
+    // --- Pluie permanente (confettis + coeurs enflammés) sur les côtés ---
+    const rainLeft = document.getElementById('rainLeft');
+    const rainRight = document.getElementById('rainRight');
+
+    function rand(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function spawnPiece(container) {
+      if (!container) return;
+
+      const isEmoji = Math.random() < 0.35; // 35% emoji, 65% confetti
+      const el = document.createElement('div');
+      el.classList.add('rain-piece');
+
+      const duration = rand(3.2, 6.0);
+      const left = rand(0, 100);
+      const rot = rand(-30, 30);
+
+      el.style.left = left + '%';
+      el.style.animationDuration = duration + 's';
+      el.style.transform = `translateY(-10vh) rotate(${rot}deg)`;
+
+      if (isEmoji) {
+        el.classList.add('rain-emoji');
+        // Mix emojis: confetti + coeur enflammé
+        el.textContent = (Math.random() < 0.55) ? '🔗' : '❤️‍🔥';
+        el.style.fontSize = Math.floor(rand(20, 34)) + 'px';
+      } else {
+        el.classList.add('rain-confetti');
+        // Couleurs flashy aléatoires
+        const hue = Math.floor(rand(0, 360));
+        el.style.background = `hsl(${hue} 90% 60%)`;
+        el.style.width = Math.floor(rand(7, 12)) + 'px';
+        el.style.height = Math.floor(rand(10, 18)) + 'px';
+      }
+
+      // Légère dérive horizontale pour varier
+      el.style.marginLeft = Math.floor(rand(-10, 10)) + 'px';
+
+      container.appendChild(el);
+      setTimeout(() => el.remove(), (duration + 0.3) * 1000);
+    }
+
+    // Densité : plus petit = plus de pluie
+    const intervalMs = 140;
+    setInterval(() => {
+      spawnPiece(rainLeft);
+      spawnPiece(rainRight);
+    }, intervalMs);
+  </script>
+</body>
+</html>
