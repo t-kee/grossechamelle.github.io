@@ -303,6 +303,95 @@
       text-align: center;
     }
 
+    /* Story-specific centering */
+    .story-article {
+      text-align: center;
+    }
+
+    .story-article h2 {
+      text-align: center;
+    }
+
+    .story-question {
+      margin: 0 0 10px;
+      font-weight: 900;
+      opacity: 1;
+      text-align: center;
+    }
+
+    /* Quiz progress */
+    .progress-wrap {
+      width: 100%;
+      max-width: 820px;
+      margin: 0 auto 14px;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.08);
+      overflow: hidden;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.10);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: rgba(46, 204, 113, 0.92);
+      transition: width 0.35s ease;
+    }
+
+    .btn-results {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 900;
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.10);
+    }
+
+    /* Pool break animation */
+    .piscine-wrap {
+      margin-top: 12px;
+      display: inline-block;
+      position: relative;
+      width: min(820px, 100%);
+      aspect-ratio: 16 / 9;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.15);
+      cursor: pointer;
+      user-select: none;
+      background: rgba(255,255,255,0.2);
+    }
+
+    .piscine-half {
+      position: absolute;
+      inset: 0;
+      background-image: url("piscine.jpg");
+      background-size: cover;
+      background-position: center;
+      transition: transform 1.2s cubic-bezier(.2,.8,.2,1), filter 1.2s cubic-bezier(.2,.8,.2,1);
+      will-change: transform;
+    }
+
+    .piscine-half.left {
+      clip-path: inset(0 50% 0 0);
+    }
+
+    .piscine-half.right {
+      clip-path: inset(0 0 0 50%);
+    }
+
+    .piscine-wrap.broken .piscine-half.left {
+      transform: translateX(-45%) rotate(-12deg);
+      filter: drop-shadow(0 18px 24px rgba(0,0,0,0.25));
+    }
+
+    .piscine-wrap.broken .piscine-half.right {
+      transform: translateX(45%) rotate(12deg);
+      filter: drop-shadow(0 18px 24px rgba(0,0,0,0.25));
+    }
+
     .article-table {
       width: min(720px, 100%);
       margin: 14px auto 18px;
@@ -327,7 +416,7 @@
     }
 
     .is-hidden {
-      display: none;
+      display: none !important;
     }
 
     .btn-toggle {
@@ -338,6 +427,76 @@
       font-weight: 900;
       background: rgba(255,255,255,0.92);
       box-shadow: 0 12px 24px rgba(0,0,0,0.10);
+    }
+
+    .quiz-answers {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    @media (max-width: 520px) {
+      .quiz-answers {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .quiz-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-weight: 900;
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.10);
+    }
+
+    .quiz-btn.is-wrong {
+      background: rgba(231, 76, 60, 0.92);
+      color: white;
+    }
+
+    .quiz-btn.is-right {
+      background: rgba(46, 204, 113, 0.92);
+      color: #0b2b16;
+    }
+
+    .quiz-next-wrap {
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .btn-next {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 900;
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.10);
+    }
+
+    .btn-next.is-hidden {
+      display: none;
+    }
+
+    .story-images-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      justify-content: center;
+      align-items: start;
+      margin-top: 14px;
+      width: min(820px, 100%);
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .story-images-row img {
+      width: 100%;
+      height: auto;
+      border-radius: 18px;
     }
 
     .toggle-row {
@@ -625,7 +784,8 @@
         </div>
 
         <div class="nav-item" id="navServices">Nos services</div>
-        <div class="nav-item" id="navStory">Notre histoire</div>
+        <div class="nav-item" id="navStory">Quiz</div>
+        <div class="nav-item" id="navChef">Le mot du chef</div>
       </nav>
 
       <div class="topbar-actions">
@@ -738,6 +898,7 @@
     const navStory = document.getElementById('navStory');
     const navServices = document.getElementById('navServices');
     const servicesOutput = document.getElementById('servicesOutput');
+    const navChef = document.getElementById('navChef');
 
     const robotLink = "https://www.amazon.fr/gp/aw/d/B0FPRK3FNV";
     function resetPageViews() {
@@ -816,6 +977,296 @@
 
       // état initial
       setSide('a');
+    }
+
+    function setupQuiz() {
+      const container = document.getElementById('storyQuizContainer');
+      if (!container) return;
+
+      const TOTAL = 10;
+      let score = 0;
+      let current = 0; // 0..9
+      const scored = new Array(TOTAL).fill(false);
+
+      const progressHTML = (idx) => {
+        const pct = Math.round(((idx + 1) / TOTAL) * 100);
+        return `
+          <div class="progress-wrap" aria-label="Progression">
+            <div class="progress-fill" style="width:${pct}%;"></div>
+          </div>
+        `;
+      };
+
+      // Gate screen BEFORE the quiz
+      const renderGate = () => {
+        container.innerHTML = `
+          <p class="story-question">Pour dévoiler le quiz, cliquer pour casser le volet de la piscine</p>
+
+          <div class="piscine-wrap" id="piscineWrap" role="button" aria-label="Casser le volet de la piscine">
+            <div class="piscine-half left" aria-hidden="true"></div>
+            <div class="piscine-half right" aria-hidden="true"></div>
+          </div>
+        `;
+
+        const wrap = document.getElementById('piscineWrap');
+        if (!wrap) return;
+
+        let done = false;
+        wrap.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (done) return;
+          done = true;
+
+          wrap.classList.add('broken');
+
+          setTimeout(() => {
+            current = 0;
+            renderQuestion();
+          }, 900);
+        });
+      };
+
+      const renderResults = () => {
+        container.innerHTML = `
+          <div class="center">
+            <p class="story-question">Quiz terminé ✅</p>
+            <button class="btn-results" id="resultsBtn" type="button">Résultats</button>
+            <div id="resultsBox" class="is-hidden" style="margin-top:14px; font-weight:900;">
+              (placeholder) Ici on mettra les résultats + le score : ${score}/${TOTAL}
+            </div>
+          </div>
+        `;
+
+        const btn = document.getElementById('resultsBtn');
+        const box = document.getElementById('resultsBox');
+        if (btn && box) {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            box.classList.remove('is-hidden');
+          });
+        }
+      };
+
+      // 10 questions total
+      const questions = [
+        //question 1
+        {
+          prompt: `Que représente cette ombre?`,
+          img: `<img id="q1Img" src="savonzoom.png" alt="Ombre mystère" />`,
+          options: [
+            { label: "Hélicoptère", correct: false },
+            { label: "Scorpion", correct: false },
+            { label: "Pieuvre", correct: false },
+            { label: "Un rangement parfait", correct: true },
+          ],
+          onCorrect: () => {
+            const img = document.getElementById('q1Img');
+            if (img) img.src = 'savon.png';
+          }
+        },
+        //question 2
+        {
+          prompt: `Combien d'enfants a-t-on ?`,
+          img: ``,
+          options: [
+            { label: "Bah 0 aux dernières nouvelles", correct: false },
+            { label: "(Chi)1", correct: false },
+            { label: "2", correct: true },
+            { label: "3", correct: false },
+          ],
+          extraOnCorrect: `
+            <div class="story-images-row" style="margin-top:14px;">
+              <img src="fille.jpg" alt="Fille" />
+              <img src="bob.jpg" alt="Bob" />
+            </div>
+          `
+        },
+        //question 3
+        {
+          prompt: `Combien veut-on d'enfants supplémentaires?`,
+          img: ``,
+          options: [
+            { label: "2 donc pas besoin de +", correct: false },
+            { label: "2 humains", correct: false },
+            { label: "3 si ça se passe bien", correct: false },
+            { label: "6", correct: true },
+          ],
+          extraOnCorrect: `<img src="maisonbobs.jpg" alt="Maison" />`
+        },
+        //question 4
+        {
+          prompt: `Quel mot a pour définition : <br><i>Ensemble de vers en nombre précis arrangés d'une manière particulière apparaissant tout au long, ou sur une partie d'un poème</i>`,
+          img: ``,
+          options: [
+            { label: "Strophe", correct: false },
+            { label: "Calligramme", correct: false },
+            { label: "Stance", correct: true },
+            { label: "Verset", correct: false },
+          ],
+          extraOnCorrect: `<img src="petitbac.PNG" alt="tricheuse" />`
+        },
+        //question 5
+        {
+          prompt: `Qu'est-ce qu'il manque?`,
+          img: `<img id="q5Img" src="bateau2.jpg" alt="cquoi" />`,
+          options: [
+            { label: "Une stance 😉", correct: false },
+            { label: "Un bateau", correct: false },
+            { label: "La moche du pressing 🧌", correct: false },
+            { label: "2 canons", correct: true },
+          ],
+          onCorrect: () => {
+            const img = document.getElementById('q5Img');
+            if (img) img.src = 'bateau.JPG';
+          }
+        },
+        //question 6
+        {
+          prompt: `C quoi ce truc?`,
+          img: `<img id="q6Img" src="painchocolat.jpg" alt="cquoi2" />`,
+          options: [
+            { label: "Des paings au chocolat", correct: true },
+            { label: "Une stance", correct: false },
+            { label: "Des chocolatchines", correct: false },
+            { label: "De la pavlova", correct: false },
+          ],
+        },
+        //question 7
+        {
+          prompt: `C quoi ça encore?`,
+          img: `<img id="q7Img" src="bouchons.png" alt="cquoi3" />`,
+          options: [
+            { label: "Des confettchis", correct: false },
+            { label: "Mon 1er kdo", correct: true },
+            { label: "Un plug", correct: false },
+            { label: "Je vois R", correct: false },
+          ],
+          onCorrect: () => {
+            const img = document.getElementById('q7Img');
+            if (img) img.src = 'bouchons.JPG';
+          }
+        },
+        //question 8
+        {
+          prompt: `Quel est cet alcool?`,
+          img: `<img id="q7Img" src="tache.JPG" alt="cquoicettetache" />`,
+          options: [
+            { label: "Un accident de lessive", correct: false },
+            { label: "Une meuf bcp trop bourrée", correct: true },
+            { label: "Pornstar Martini", correct: false },
+            { label: "Quelle tâche? il est immaculé ce t-shirt", correct: false },
+          ],
+        },
+        //question 9
+        {
+          prompt: `Que voit-on sur cette image?`,
+          img: `<img id="q9Img" src="beauvais.JPG" alt="ladeter" />`,
+          options: [
+            { label: "Des Airbus A320", correct: false },
+            { label: "David Guetta", correct: false },
+            { label: "Une BMW M1 Bretzel trop bruyante", correct: false },
+            { label: "Une déter kilométrique par amour", correct: true },
+          ],
+        },
+        //question 10
+        {
+          prompt: `Quelle est la pire odeur sur Terre?`,
+          img: ``,
+          options: [
+            { label: "Le RER A", correct: false },
+            { label: "Le zizi qui sent le sauciflard", correct: false },
+            { label: "Chambre 204", correct: true },
+            { label: "Le parfum de tes ex", correct: false },
+          ],
+          extraOnCorrect: `<img src="chier.jpg" alt="JF" />`
+        },
+
+      ];
+
+      const renderQuestion = () => {
+        const q = questions[current];
+
+        const optionsHTML = q.options.map(o =>
+          `<button class="quiz-btn" type="button" data-correct="${o.correct ? '1' : '0'}">${o.label}</button>`
+        ).join('');
+
+        container.innerHTML = `
+          ${progressHTML(current)}
+          <p class="story-question">${q.prompt}</p>
+
+          ${q.img || ""}
+
+          <div class="quiz-answers">
+            ${optionsHTML}
+          </div>
+
+          <div id="quizExtra" class="is-hidden"></div>
+
+          <div class="quiz-next-wrap">
+            <button class="btn-next is-hidden" id="quizNextBtn" type="button">Suivant</button>
+          </div>
+        `;
+
+        const buttons = container.querySelectorAll('.quiz-btn');
+        const nextBtn = document.getElementById('quizNextBtn');
+        const extra = document.getElementById('quizExtra');
+
+        const isLast = current === TOTAL - 1;
+
+        const showExtra = () => {
+          if (q.extraOnCorrect && extra) {
+            extra.innerHTML = q.extraOnCorrect;
+            extra.classList.remove('is-hidden');
+          }
+          if (typeof q.onCorrect === 'function') q.onCorrect();
+        };
+
+        buttons.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            // reset state
+            buttons.forEach(b => b.classList.remove('is-wrong', 'is-right'));
+
+            const ok = btn.getAttribute('data-correct') === '1';
+            if (!ok) {
+              btn.classList.add('is-wrong');
+              return;
+            }
+
+            btn.classList.add('is-right');
+
+            // score once per question
+            if (!scored[current]) {
+              scored[current] = true;
+              score += 1;
+            }
+
+            showExtra();
+
+            if (nextBtn) {
+              nextBtn.classList.remove('is-hidden');
+              nextBtn.textContent = isLast ? "Résultats" : "Suivant";
+            }
+          });
+        });
+
+        if (nextBtn) {
+          nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            if (isLast) {
+              renderResults();
+              return;
+            }
+
+            current += 1;
+            renderQuestion();
+          });
+        }
+      };
+
+      renderGate();
     }
 
     function showPopup() {
@@ -942,47 +1393,30 @@
       });
     }
 
+    if (navChef) {
+      navChef.addEventListener('click', (e) => {
+        e.stopPropagation();
+        resetPageViews();
+        showInProductArea(`
+          <div class="article">
+            <img src="fkarizona.jpg" alt="notre amour" />
+            Euh bah voilà c tout.
+          </div>
+        `);
+      });
+    }
+
     if (navStory) {
       navStory.addEventListener('click', (e) => {
         e.stopPropagation();
         resetPageViews();
         showInProductArea(`
-          <div class="article">
-            <h2>Notre histoire</h2>
-
-            <p>(texte placeholder) Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-
-            <div class="center">
-              <button class="btn-toggle" id="toggleStoryTableBtn" type="button">Afficher</button>
-            </div>
-
-            <table class="article-table is-hidden" id="storyTable">
-              <thead>
-                <tr>
-                  <th>Colonne A</th>
-                  <th>Colonne B</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Placeholder 1</td>
-                  <td>Placeholder 2</td>
-                </tr>
-                <tr>
-                  <td>Placeholder 3</td>
-                  <td>Placeholder 4</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <p>(texte placeholder) Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-
-            
-            <img src="savon.png" alt="notre amour" />
-            
+          <div class="article story-article">
+            <h2>Quiz</h2>
+            <div id="storyQuizContainer"></div>
           </div>
         `);
-        setupTableToggle('toggleStoryTableBtn', 'storyTable');
+        setupQuiz();
       });
     }
 
