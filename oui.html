@@ -755,13 +755,88 @@
       border-radius: 12px;
       font-weight: 800;
       font-size: 14px;
-      z-index: 10003;
+      z-index: 10006;
       display: none;
       max-width: 260px;
       text-align: center;
+      pointer-events: none;
     }
 
     .tooltip.show { display: block; }
+
+    /* Side offer popup (non-blocking) */
+    .side-offer {
+      position: fixed;
+      top: 96px; /* below topbar */
+      /* push it towards the center so it covers part of the article */
+      right: calc(min(18vw, 220px) + 24px);
+      width: min(520px, 60vw);
+      max-height: calc(100vh - 130px);
+      overflow: auto;
+      background: rgba(255,255,255,0.94);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.22);
+      backdrop-filter: blur(10px);
+      z-index: 10003;
+      padding: 16px 16px 14px;
+      display: none;
+      text-align: left;
+    }
+
+    .side-offer.show {
+      display: block;
+    }
+
+    .side-offer-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .side-offer-title {
+      font-weight: 900;
+      font-size: 18px;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .side-offer-close {
+      border: none;
+      background: rgba(255,255,255,0.85);
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 900;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+
+    .side-offer img {
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.15);
+    }
+
+    @media (max-width: 900px) {
+      .side-offer {
+        right: 18px;
+        width: min(520px, 78vw);
+      }
+    }
+
+    @media (max-width: 650px) {
+      .side-offer {
+        left: 12px;
+        right: 12px;
+        width: auto;
+        top: 88px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -823,6 +898,7 @@
   </div>
 
   <div class="tooltip" id="tooltip" aria-hidden="true">Désolé g pas un copec</div>
+  <div class="side-offer" id="sideOffer" aria-hidden="true"></div>
 
   <div class="side-rain" id="rainLeft" aria-hidden="true"></div>
   <div class="side-rain" id="rainRight" aria-hidden="true"></div>
@@ -912,6 +988,17 @@
     const writeUsBtn = document.getElementById('writeUsBtn');
     const servicesPopup = document.getElementById('servicesPopup');
 
+    const sideOffer = document.getElementById('sideOffer');
+
+    // Valentine side-offer timers (cleared on navigation)
+    let valOfferTimer1 = null;
+    let valOfferTimer2 = null;
+    let valOfferAfterCloseTimer = null;
+
+    // Delays (ms) – tweak later if you want
+    let VAL_OFFER_FIRST_DELAY = 3000;
+    let VAL_OFFER_SECOND_AFTER_CLOSE_DELAY = 5000;
+
     const robotLink = "https://www.amazon.fr/gp/aw/d/B0FPRK3FNV";
     // --- Hash router (Back/Forward friendly) ---
     let isApplyingRoute = false;
@@ -944,6 +1031,85 @@
       return null;
     }
 
+    function stopValentineOffers() {
+      if (valOfferTimer1) { clearTimeout(valOfferTimer1); valOfferTimer1 = null; }
+      if (valOfferTimer2) { clearTimeout(valOfferTimer2); valOfferTimer2 = null; }
+      if (valOfferAfterCloseTimer) { clearTimeout(valOfferAfterCloseTimer); valOfferAfterCloseTimer = null; }
+      if (sideOffer) {
+        sideOffer.classList.remove('show');
+        sideOffer.setAttribute('aria-hidden', 'true');
+        sideOffer.innerHTML = '';
+      }
+    }
+
+    function showSideOffer({ titleText, imgSrc, imgAlt, addTooltipText, onClose }) {
+      if (!sideOffer) return;
+
+      sideOffer.innerHTML = `
+        <div class="side-offer-header">
+          <h3 class="side-offer-title">${titleText}</h3>
+          <button class="side-offer-close" id="sideOfferClose" type="button" aria-label="Fermer">×</button>
+        </div>
+        <img src="${imgSrc}" alt="${imgAlt}" />
+        <div style="margin-top:12px; text-align:center;">
+          <button class="btn-primary" id="sideOfferAddBtn" type="button">Ajouter au panier</button>
+        </div>
+      `;
+
+      sideOffer.classList.add('show');
+      sideOffer.setAttribute('aria-hidden', 'false');
+
+      const closeBtn = document.getElementById('sideOfferClose');
+      const addBtn = document.getElementById('sideOfferAddBtn');
+      const doClose = (e) => {
+        if (e) e.stopPropagation();
+        if (!sideOffer) return;
+        sideOffer.classList.remove('show');
+        sideOffer.setAttribute('aria-hidden', 'true');
+        sideOffer.innerHTML = '';
+        if (typeof onClose === 'function') onClose();
+      };
+
+      if (addBtn) {
+        addBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const txt = addTooltipText || "Désolé g pas un copec";
+          showTooltipNear(addBtn, txt);
+        });
+      }
+
+      if (closeBtn) closeBtn.addEventListener('click', doClose);
+    }
+
+    function scheduleValentineOffers() {
+      // reset any previous timers/popups
+      stopValentineOffers();
+
+      // Offer 1 after delay
+      valOfferTimer1 = setTimeout(() => {
+        showSideOffer({
+          titleText: "Avez-vous pensé à ajouter du sel dans votre panier?",
+          imgSrc: "selsac.jpg",
+          imgAlt: "Sac de sel",
+          addTooltipText: "Tu manges déjà trop de sel MGC",
+          onClose: () => {
+            // Only after close: schedule offer 2
+            valOfferAfterCloseTimer = setTimeout(() => {
+              showSideOffer({
+                titleText: "Et des Curly vous en avez?",
+                imgSrc: "curly.jpg",
+                imgAlt: "Curly",
+                addTooltipText: "T'as pas besoin d'amis ni de Curly tu m'as moi",
+                onClose: () => {
+                  // no follow-up for now
+                }
+              });
+            }, VAL_OFFER_SECOND_AFTER_CLOSE_DELAY);
+          }
+        });
+      }, VAL_OFFER_FIRST_DELAY);
+    }
+
     function applyRouteFromHash() {
       const route = getRoute();
       isApplyingRoute = true;
@@ -954,6 +1120,7 @@
         if (cartPopover) cartPopover.classList.remove('show');
         hidePopup();
         hideServicesPopup();
+        stopValentineOffers();
 
         if (route === 'home') {
           resetPageViews();
@@ -1104,6 +1271,7 @@
               </div>
             `);
             setupTableToggle('toggleValentineTableBtn', 'valentineTable');
+            scheduleValentineOffers();
             return;
           }
 
@@ -1614,7 +1782,7 @@
       tooltip.style.left = x + 'px';
       tooltip.style.top = y + 'px';
 
-      setTimeout(() => tooltip.classList.remove('show'), 1400);
+      setTimeout(() => tooltip.classList.remove('show'), 2200);
     }
 
     function toggleCart() {
