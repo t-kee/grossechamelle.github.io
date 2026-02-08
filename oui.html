@@ -6,6 +6,10 @@
   <title>OUIIIIIIIIIII</title>
   <style>
     html, body { margin: 0; }
+    :root {
+      /* Space to keep content visible below the fixed topbar when using scrollIntoView */
+      --scroll-offset: 100px;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #f6f3ef; /* couleur des marges (même que les côtés) */
@@ -15,7 +19,7 @@
       position: relative;
       min-height: 100vh;
       overflow-x: hidden;
-      padding-top: 86px; /* place for top banner */
+      padding-top: var(--scroll-offset); /* place for top banner */
     }
     .card {
       position: relative;
@@ -252,6 +256,7 @@
     #productArea {
       margin-top: 26px;
       display: none;
+      scroll-margin-top: var(--scroll-offset);
     }
 
     #productArea.show {
@@ -265,10 +270,12 @@
       border-radius: 18px;
       padding: 18px;
       box-shadow: 0 20px 45px rgba(0,0,0,0.14);
+      scroll-margin-top: var(--scroll-offset);
     }
 
     #defaultContent {
       margin-top: 26px;
+      scroll-margin-top: var(--scroll-offset);
     }
 
     .product-card img {
@@ -277,6 +284,19 @@
       border-radius: 18px;
       box-shadow: 0 14px 28px rgba(0,0,0,0.15);
       margin: 0 auto;
+    }
+
+    /* Compact product images (mollets / doigt) so buttons stay visible */
+    .product-card img.compact-img {
+      max-height: 600px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    @media (max-width: 700px) {
+      .product-card img.compact-img {
+        max-height: 260px;
+      }
     }
 
     /* Long-form article layout inside product-card */
@@ -395,8 +415,14 @@
     .article-table {
       width: min(720px, 100%);
       margin: 14px auto 18px;
-      border-collapse: collapse;
-      overflow: hidden;
+
+      /* Sticky headers are flaky with border-collapse:collapse in some browsers */
+      border-collapse: separate;
+      border-spacing: 0;
+
+      /* Do NOT hide overflow on the table itself (breaks sticky in Chrome) */
+      overflow: visible;
+
       border-radius: 14px;
       box-shadow: 0 12px 26px rgba(0,0,0,0.12);
       background: rgba(255,255,255,0.92);
@@ -413,6 +439,40 @@
     .article-table th {
       background: rgba(246,243,239,0.95);
       font-weight: 900;
+    }
+
+    /* Scroll inside the table container (Excel-like) */
+    .table-scroll {
+      width: min(720px, 100%);
+      margin: 14px auto 18px;
+      max-height: 420px; /* adjust later if you want */
+      overflow: auto;
+      border-radius: 14px;
+      box-shadow: 0 12px 26px rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.92);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* When the table is inside the scroll wrapper, let wrapper handle rounding */
+    .table-scroll .article-table {
+      margin: 0;
+      width: 100%;
+      border-radius: 0;
+      box-shadow: none;
+      background: transparent;
+    }
+
+    /* Freeze table header like Excel (inside its own scroll container) */
+    .table-scroll thead {
+      display: table-header-group;
+    }
+
+    .table-scroll thead th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: rgba(246,243,239,0.98);
+      box-shadow: 0 10px 18px rgba(0,0,0,0.06);
     }
 
     .is-hidden {
@@ -569,6 +629,7 @@
       font-weight: 900;
       font-size: 22px;
       display: none;
+      scroll-margin-top: var(--scroll-offset);
     }
 
     #servicesOutput.show {
@@ -996,8 +1057,8 @@
     let valOfferAfterCloseTimer = null;
 
     // Delays (ms) – tweak later if you want
-    let VAL_OFFER_FIRST_DELAY = 3000;
-    let VAL_OFFER_SECOND_AFTER_CLOSE_DELAY = 5000;
+    let VAL_OFFER_FIRST_DELAY = 6000;
+    let VAL_OFFER_SECOND_AFTER_CLOSE_DELAY = 12000;
 
     const robotLink = "https://www.amazon.fr/gp/aw/d/B0FPRK3FNV";
     // --- Hash router (Back/Forward friendly) ---
@@ -1161,7 +1222,7 @@
           // Simulate the same logic as dropdown click
           if (key === 'mollets') {
             showInProductArea(`
-              <img id="molletImg" src="mollet_avant.png" alt="Mollet" />
+              <img id="molletImg" class="compact-img" src="mollet_avant.png" alt="Mollet" />
               <div class="toggle-row">
                 <button class="toggle-btn" id="btnMolletAvant" type="button">Avant</button>
                 <button class="toggle-btn" id="btnMolletArriere" type="button">Arrière</button>
@@ -1184,7 +1245,7 @@
 
           if (key === 'doigt') {
             showInProductArea(`
-              <img id="doigtImg" src="doigt_avant.png" alt="Doigt" />
+              <img id="doigtImg" class="compact-img" src="doigt_avant.png" alt="Doigt" />
               <div class="toggle-row">
                 <button class="toggle-btn" id="btnDoigtAvant" type="button">Avant</button>
                 <button class="toggle-btn" id="btnDoigtArriere" type="button">Arrière</button>
@@ -1211,7 +1272,7 @@
 
                 <p>Mon bb d’amour,</p>
                 <p>Même si c’est une fête commerciale, moi j’ai toujours envie de te couvrir (noyer) d’amour et de te gâter. 
-                  J’ai donc pas seulement acheté un piti truc, j’ai carrément fait le magasin. J’espère que les produits te plairont.</p>
+                  J’ai donc rien acheté, j’ai carrément fait le magasin (en attendant d'être plein de moulaga). J’espère que les produits te plairont.</p>
                 <p>J’ai longtemps hésité à reprendre mes cadeaux hebdromadaires mais je me suis dit qu’un gros cadeau pour une de nos fêtes ça 
                   serait mieux et ça changerait, sachant qu’à Noël je t’ai rien offert 🥺 en plus là c’est la fête des amoureux, je pense que ça s’applique bien à nous ❤️‍🔥</p>
                 <p>Je voudrais te prouver à travers ça que non seulement je t’aime plus que tout, mais que je dédierai un maximum de mon temps libre pour toi. 
@@ -1223,15 +1284,13 @@
                   Et comme j'ai envie de faire toute ma vie avec toi, je me suis dit que c'était important de poser les + et les - de toi. Donc les voici 
                   (c pas du tout exhaustif, je continuerai un autre jour) :
                 </p>
-                <div class="center">
-                  <button class="btn-toggle" id="toggleValentineTableBtn" type="button">Afficher</button>
-                </div>
 
-                <table class="article-table is-hidden" id="valentineTable">
+                <div class="table-scroll" aria-label="Tableau points + et -">
+                <table class="article-table" id="valentineTable">
                   <thead>
                     <tr>
-                      <th>+</th>
-                      <th>-</th>
+                      <th>Points +</th>
+                      <th>Points -</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1251,26 +1310,99 @@
                       <td>Pense beaucoup trop à moi et à me rendre heureux</td>
                     </tr>
                     <tr>
-                      <td></td>
+                      <td>Reine du cordon bleu</td>
                       <td>Me fait/donne des t-shirts trop beaux du coup j'ai plus rien à choisir</td>
                     </tr><tr>
-                      <td></td>
+                      <td>Peut couper des oignons sans chialer (parfois)</td>
                       <td>Me rend précoce</td>
                     </tr>
-                      <td></td>
-                      <td>A des ongles de tchoin qui me frissonnent</td>
+                    <tr>
+                      <td>Voit pas grand chose donc sait pas que je suis qu'un 6/10</td>
+                      <td>A des ongles de tchoin (qui me frissonnent)</td>
+                    </tr>
+                    <tr>
+                      <td>Laisse toujours une petite pensée pour l'Afrique au fond de ses verres</td>
+                      <td>Ne peut pas dormir sur le ventre à cause de ses 2 énormes coussins</td>
+                    </tr>
+                    <tr>
+                      <td>Sert les shots en boîte sans en mettre sur les t-shirts</td>
+                      <td>Sait pas faire une pompe</td>
+                    </tr>
+                    <tr>
+                      <td>Pense à la planète et ne lave ses draps qu'une fois par an</td>
+                      <td>Fait baver tous les hommes</td>
+                    </tr>
+                    <tr>
+                      <td>A une super poubelle multi-fonctions</td>
+                      <td>Me me laisse rien faire chez elle</td>
+                    </tr>
+                    <tr>
+                      <td>Fait partie d'un cortège</td>
+                      <td>Me cause de la tachycardie</td>
+                    </tr>
+                    <tr>
+                      <td>Aime le RER A</td>
+                      <td>Risque de me faire changer de copine régulièrement comme fin Décembre où j'ai dû dire adieu à mon ex</td>
+                    </tr>
+                    <tr>
+                      <td>Utilise régulièrement son thermomix afin de concocter de délicieux plats</td>
+                      <td>Nos enfants se feront bully car leur mère est une MILF</td>
+                    </tr>
+                    <tr>
+                      <td>Si une méduse me pique, je sais qu'elle me pissera dessus sans problème</td>
+                      <td>Ne veut pas faire raquer son père pour notre mariage</td>
+                    </tr>
+                    <tr>
+                      <td>A un tapis gigantesque pour recouvrir toutes les poussières du monde</td>
+                      <td>Rend ses amies ultra moches et fait complexer 4Mds de femmes</td>
+                    </tr>
+                    <tr>
+                      <td>Peut faire de la super fumée qui sent bon les fruits</td>
+                      <td>A un grand coeur qu'elle ne dédie qu'à moi plutôt qu'à des associations pour les démunis</td>
+                    </tr>
+                    <tr>
+                      <td>Connaît mes codes de carte donc pourra me gâter</td>
+                      <td>Aime faire la vaisselle et passer l'aspi alors que c'est moi son esclave</td>
+                    </tr>
+                    <tr>
+                      <td>Achète les bougies par pack de 16 afin de profiter des promotions Temu</td>
+                      <td>Ne croît pas en Dieu alors qu'elle est un miracle</td>
+                    </tr>
+                    <tr>
+                      <td>Arrive à choper des places de concerts</td>
+                      <td>Me fait beaucoup rire du coup je risque de m'étouffer</td>
+                    </tr>
+                    <tr>
+                      <td>Me prévient calmement quand on dort de "surtout pas faire ça"</td>
+                      <td>Me pince gratuitement dans mon sommeil</td>
+                    </tr>
+                    <tr>
+                      <td>A peur des vagues donc elle pourra pas se noyer</td>
+                      <td>Est complètement folle (elle garde un verre d'eau à côté du lit)</td>
+                    </tr>
+                    <tr>
+                      <td>Avec elle, je sais que je suis la reine des petites salopes 🥰</td>
+                      <td>A que des idées de prénoms mainstream pour nos mioches</td>
                     </tr>
                   </tbody>
                 </table>
+                </div>
 
-                <p>(texte placeholder) Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-
+                <p>Bon du coup y'a autant de + que de -... C'est pas facile de se décider</p>
+                <img src="salopard.jpg" alt="ahok" />
+                <p>Je crois que la balance est en train de pencher...</p>
+                <img src="meilleure.jpg" alt="Une image" />
+                <p>C bon j'ai pris ma décision tu m'as convaincu. Je vais prendre le risque de passer ma vie avec toi. Et celles d'après aussi. </p>
+                <p>Quand tout est aussi facile avec quelqu'un, je pense qu'il y a une bonne raison. Et la raison c'est qu'on est des âmes soeurs. 
+                  C'est pas quelque chose que je dirais à la légère, je le pense sincèrement et je prendrais pas le risque de dire ça si j'en étais pas convaincu.</p>
+                <p>Je t'aime tellement et pour toujours, j'espère que tu accepteras d'être ma valentine tous les ans, que je te gâte tout le temps et que je te prouve
+                  mon amour jusqu'à ce qu'on 🦯. Je suis à toi pour toujours.</p><br>
+                <p>Ta pitite glace à la framboise aux pépites de pistache</p>
                 <!--
                 <img src="ton_image.jpg" alt="Une image" />
                 -->
               </div>
             `);
-            setupTableToggle('toggleValentineTableBtn', 'valentineTable');
             scheduleValentineOffers();
             return;
           }
@@ -1328,7 +1460,8 @@
       resetPageViews();
       productArea.innerHTML = `<div class="product-card">${html}</div>`;
       productArea.classList.add('show');
-      productArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const card = productArea.querySelector('.product-card');
+      (card || productArea).scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function setupTableToggle(btnId, tableId) {
@@ -1389,9 +1522,7 @@
       if (!container) return;
 
       const TOTAL = 10;
-      let score = 0;
       let current = 0; // 0..9
-      const scored = new Array(TOTAL).fill(false);
 
       // Start route: gate/question/results
       const start = startRoute || { mode: 'gate' };
@@ -1447,21 +1578,11 @@
         container.innerHTML = `
           <div class="center">
             <p class="story-question">Quiz terminé ✅</p>
-            <button class="btn-results" id="resultsBtn" type="button">Résultats</button>
-            <div id="resultsBox" class="is-hidden" style="margin-top:14px; font-weight:900;">
-              (placeholder) Ici on mettra les résultats + le score : ${score}/${TOTAL}
+            <div style="margin-top:14px; font-weight:900;">
+              Bravo bb, je suis sûr que tu as eu 10/10 (j'ai pas compté les points pour cette fois).
             </div>
           </div>
         `;
-
-        const btn = document.getElementById('resultsBtn');
-        const box = document.getElementById('resultsBox');
-        if (btn && box) {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            box.classList.remove('is-hidden');
-          });
-        }
       };
 
       // 10 questions total
@@ -1653,12 +1774,6 @@
             }
 
             btn.classList.add('is-right');
-
-            // score once per question
-            if (!scored[current]) {
-              scored[current] = true;
-              score += 1;
-            }
 
             showExtra();
 
