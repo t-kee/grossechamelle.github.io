@@ -147,10 +147,10 @@
       left: min(18vw, 220px);
       right: min(18vw, 220px);
 
-      /* Color behind the PNG (shows through transparency) */
+      /* Color behind the png (shows through transparency) */
       background-color: #f6f3ef;
 
-      /* We draw the PNG only ONCE via ::after */
+      /* We draw the png only ONCE via ::after */
       z-index: 0;
       pointer-events: none;
     }
@@ -160,7 +160,7 @@
       position: absolute;
       inset: 0;
 
-      /* The PNG layer */
+      /* The png layer */
       background-image: url("background_oui.png");
       background-size: cover;
       background-position: center;
@@ -1641,7 +1641,7 @@
             { label: "Stance", correct: true },
             { label: "Verset", correct: false },
           ],
-          extraOnCorrect: `<img src="petitbac.PNG" alt="tricheuse" />`
+          extraOnCorrect: `<img src="petitbac.png" alt="tricheuse" />`
         },
         //question 5
         {
@@ -1655,7 +1655,7 @@
           ],
           onCorrect: () => {
             const img = document.getElementById('q5Img');
-            if (img) img.src = 'bateau.JPG';
+            if (img) img.src = 'bateau.jpg';
           }
         },
         //question 6
@@ -1681,13 +1681,13 @@
           ],
           onCorrect: () => {
             const img = document.getElementById('q7Img');
-            if (img) img.src = 'bouchons.JPG';
+            if (img) img.src = 'bouchons.jpg';
           }
         },
         //question 8
         {
           prompt: `Quel est cet alcool?`,
-          img: `<img id="q7Img" src="tache.JPG" alt="cquoicettetache" />`,
+          img: `<img id="q7Img" src="tache.jpg" alt="cquoicettetache" />`,
           options: [
             { label: "Un accident de lessive", correct: false },
             { label: "Une meuf bcp trop bourrée", correct: true },
@@ -1698,7 +1698,7 @@
         //question 9
         {
           prompt: `Que voit-on sur cette image?`,
-          img: `<img id="q9Img" src="beauvais.JPG" alt="ladeter" />`,
+          img: `<img id="q9Img" src="beauvais.jpg" alt="ladeter" />`,
           options: [
             { label: "Des Airbus A320", correct: false },
             { label: "David Guetta", correct: false },
