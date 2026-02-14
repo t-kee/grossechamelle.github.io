@@ -62,10 +62,11 @@
       white-space: pre-line;
       font-weight: 600;
       display: none;
+      font-size: 16px;
     }
     
-    .status.ok { color: #1e7f3a; }
-    .status.bad { color: #c0392b; }
+    .status.ok { color: #1e7f3a; font-size: 22px; }
+    .status.bad { color: #c0392b; font-size: 16px; }
     
     .confetti {
       position: fixed;
@@ -125,7 +126,7 @@
 <body>
   <div class="card">
     <h1>Accès réservé à une grosse chamelle 🔐</h1>
-    <p>Entre le mot de passe reçu par lettre.</p>
+    <p>Entre le mot de passe. Indice : ça ressemble à un mot de passe existant mais tu t'es trompée de nom.</p>
 
     <input type="password" id="password" placeholder="Mot de passe">
     <button onclick="checkPassword()">Entrer</button>
@@ -135,6 +136,18 @@
 
   <script>
     const PASSWORD = "JeSuisUneGrosseChamelle68*";
+    let wrongAttempts = 0;
+
+    const HINTS = [
+      "C quasiment ton mot de passe Netflix sauf que tu t'appelles pas Julia",
+      "Quel animal es-tu bb ?",
+      "Une majuscule au début de chaque mot",
+      "Bb !!!!! La barbe. C quasiment ton mot de passe Netflix sauf que tu t'appelles pas Julia car tu es une...",
+      "Bb soit tu n'y mets pas du tien soit tu sais pas lire",
+      "Tu vas me détester MDR allez plus que 2 essais",
+      "Bon bah tu vas devoir attendre que je me réveille mdrrrrrr",
+      "JeSuisUneGrosseChamelle : et par quoi ça finit ton mdp?",
+    ];
   
     function rand(min, max) {
       return Math.random() * (max - min) + min;
@@ -173,21 +186,25 @@
     function checkPassword() {
       const input = document.getElementById("password").value;
       const card = document.querySelector(".card");
-  
+
       if (input !== PASSWORD) {
-        setStatus("Tu sais pas lire bb?", "bad");
+        wrongAttempts += 1;
+        const idx = Math.min(wrongAttempts, HINTS.length) - 1;
+        setStatus(HINTS[idx], "bad");
         card.classList.add("shake");
         setTimeout(() => card.classList.remove("shake"), 400);
         return;
       }
-  
+
+      wrongAttempts = 0;
+
       // Bon mot de passe → troll
-      setStatus("Bb change donc tes lentchilles 👁️👄👁️", "bad");
-  
+      setStatus("Bb tu vas devoir attendre que je me réveille 👁️👄👁️", "bad");
+
       setTimeout(() => {
-        setStatus("C une blague bb, je t'ouvre", "ok");
+        setStatus("C une blague bb, tu as trouvé !!!!!!!!! je t'ouvre", "ok");
         confettiBurst(120);
-  
+
         setTimeout(() => {
           window.location.href = "secret.html";
         }, 3500);

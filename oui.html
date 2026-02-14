@@ -605,6 +605,28 @@
       font-size: 34px;
     }
 
+    /* Services popup: push content below the fixed topbar so the close X is visible */
+    .full-popup.services {
+      align-items: flex-start;
+      padding-top: 92px; /* topbar (62px) + breathing room */
+      box-sizing: border-box;
+    }
+
+    .popup-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 34px;
+      height: 34px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: rgba(255,255,255,0.85);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+      font-weight: 900;
+      line-height: 1;
+    }
+
     .nav-item:hover .dropdown {
       display: block;
     }
@@ -976,8 +998,9 @@
         <p style="margin:0; font-weight:700; opacity:0.9;">
             Euh bah c simple je ferai tout ce que tu voudras.
         </p>
-        <div style="margin-top:14px; text-align:center;">
+        <div style="margin-top:14px; text-align:center; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
           <button class="btn-next" id="writeUsBtn" type="button">Nous écrire</button>
+          <button class="btn-next" id="findUsBtn" type="button">Nous trouver</button>
         </div>
     </div>
 
@@ -994,8 +1017,9 @@
       <div class="box">eh oh ça va pas la tête!!!!! C seulement en face to face ça.</div>
     </div>
 
-    <div class="full-popup" id="servicesPopup" aria-hidden="true">
-      <div class="box" style="max-width: 820px; width: calc(100% - 40px); text-align:center;">
+    <div class="full-popup services" id="servicesPopup" aria-hidden="true">
+      <div class="box" style="max-width: 820px; width: calc(100% - 40px); text-align:center; position:relative;">
+        <button class="popup-close" id="servicesPopupClose" type="button" aria-label="Fermer">×</button>
         <div style="font-size: 20px; font-weight: 900; margin-bottom: 14px;">Pour nous écrire, envoyez-vos demandes à Dolphe dans cette boîte aux lettres.</div>
         <img src="boiteauxlettres.jpg" alt="Boîte aux lettres" style="max-width:100%; border-radius: 18px; box-shadow: 0 14px 28px rgba(0,0,0,0.15);" />
       </div>
@@ -1061,6 +1085,8 @@
     let VAL_OFFER_SECOND_AFTER_CLOSE_DELAY = 12000;
 
     const robotLink = "https://www.amazon.fr/gp/aw/d/B0FPRK3FNV";
+    // TODO: replace with your real link
+    const findUsLink = "https://maps.app.goo.gl/iudAk1T5a22dPzFfA";
     // --- Hash router (Back/Forward friendly) ---
     let isApplyingRoute = false;
 
@@ -1199,6 +1225,13 @@
             w.onclick = (ev) => {
               ev.stopPropagation();
               showServicesPopup();
+            };
+          }
+          const f = document.getElementById('findUsBtn');
+          if (f) {
+            f.onclick = (ev) => {
+              ev.stopPropagation();
+              window.open(findUsLink, '_blank', 'noopener,noreferrer');
             };
           }
           servicesOutput.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1397,7 +1430,9 @@
                   C'est pas quelque chose que je dirais à la légère, je le pense sincèrement et je prendrais pas le risque de dire ça si j'en étais pas convaincu.</p>
                 <p>Je t'aime tellement et pour toujours, j'espère que tu accepteras d'être ma valentine tous les ans, que je te gâte tout le temps et que je te prouve
                   mon amour jusqu'à ce qu'on 🦯. Je suis à toi pour toujours.</p><br>
-                <p>Ta pitite glace à la framboise aux pépites de pistache</p>
+                <p>Ta pitite glace à la framboise aux pépites de pistache</p><br><br>
+                <p>PS : dsl g pas encore les moyens de t'acheter une Cupra pour la St Valentin, j'espère que t'attendais pas un cadeau incroyable à dix houite mille euros 
+                  mais que ça te fera un peu patienter en attendant les dingueries que je te prépare...</p>
                 <!--
                 <img src="ton_image.jpg" alt="Une image" />
                 -->
@@ -1839,6 +1874,13 @@
 
     if (servicesPopup) {
       servicesPopup.addEventListener('click', hideServicesPopup);
+    }
+    const servicesPopupClose = document.getElementById('servicesPopupClose');
+    if (servicesPopupClose) {
+      servicesPopupClose.addEventListener('click', (e) => {
+        e.stopPropagation();
+        hideServicesPopup();
+      });
     }
 
     // ESC closes the services popup
